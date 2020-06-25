@@ -1,86 +1,96 @@
-$(document).ready(function() {
-    
-    
-    /* ======= Scrollspy ======= */
-   $('body').scrollspy({ target: '#section-nav', offset: 100});
+/*
+	Twenty by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+*/
 
-    
-    /* ======= ScrollTo ======= */
-    $('.scrollto').on('click', function(e){
-        
-        //store hash
-        var target = this.hash;
-                
-        e.preventDefault();
-        
-        if ($(window).width() < 992){
-	        $('body').scrollTo(target, 800, {offset: 0, 'axis':'y'});
-	    }
-	    else {
-	        $('body').scrollTo(target, 800, {offset: -64, 'axis':'y'});
-	    }
-		
-		
-	});
-	
-	/* ======= Fixed page nav when scrolled ======= */    
-    $(window).on('scroll resize', function() {
-        
-         $('#section-nav-wrapper').removeClass('fixed');
-         
-         var scrollTop = $(this).scrollTop();
-                  
-         // Check fixednav contains any element before get the offset - https://stackoverflow.com/questions/20175094/uncaught-typeerror-cannot-read-property-top-of-undefined
-         
-         var fixednav = $('#section-nav-wrapper');
-         
-         if  (fixednav.length) {
-	        var topDistance = $('#section-nav-wrapper').offset().top;
-         }
-         
-         if ( (topDistance) > scrollTop ) {
-            $('#section-nav-wrapper').removeClass('fixed');
-            $('body').removeClass('sticky-section-nav');
-         }
-         else {
-            $('#section-nav-wrapper').addClass('fixed');
-            $('body').addClass('sticky-section-nav');
-         }
+(function($) {
 
-    });
-    
+	var	$window = $(window),
+		$body = $('body'),
+		$header = $('#header'),
+		$banner = $('#banner');
 
-    /* ======= Modules accordion ======= */
-    $('.module-toggle').on('click', function () {
-      if ($(this).find('svg').attr('data-icon') == 'plus' ) {
-        $(this).find('svg').attr('data-icon', 'minus');
-      } else {
-        $(this).find('svg').attr('data-icon', 'plus');
-      };
-    });
+	// Breakpoints.
+		breakpoints({
+			wide:      [ '1281px',  '1680px' ],
+			normal:    [ '981px',   '1280px' ],
+			narrow:    [ '841px',   '980px'  ],
+			narrower:  [ '737px',   '840px'  ],
+			mobile:    [ null,      '736px'  ]
+		});
 
-    
-    /* ======= Play/Stop Video in Bootstrpa Modal  ======= */
-	/* ======= Note: Chrome 66+ doesn't allow vimeo video auto play (https://github.com/vimeo/player.js/issues/199) ====== */
+	// Play initial animations on page load.
+		$window.on('load', function() {
+			window.setTimeout(function() {
+				$body.removeClass('is-preload');
+			}, 100);
+		});
 
-    $('.video-play-trigger').on('click', function() {
-        
-        var theModal = $(this).data("target");
-        var theVideo = $(theModal + ' iframe').attr('src');
-        var theVideoAuto = theVideo + "?autoplay=1";
-        
-        $(theModal).on('shown.bs.modal', function () {
-            $(theModal + ' iframe').attr('src', theVideoAuto);
-        });
-        
-        $(theModal).on('hide.bs.modal', function () {
-            $(theModal + ' iframe').attr('src', '');
-        });
-        
-        $(theModal).on('hidden.bs.modal', function () {
-            $(theModal + ' iframe').attr('src', theVideo);
-        });
- 
-    });
+	// Scrolly.
+		$('.scrolly').scrolly({
+			speed: 1000,
+			offset: function() { return $header.height() + 10; }
+		});
 
-});
+	// Dropdowns.
+		$('#nav > ul').dropotron({
+			mode: 'fade',
+			noOpenerFade: true,
+			expandMode: (browser.mobile ? 'click' : 'hover')
+		});
+
+	// Nav Panel.
+
+		// Button.
+			$(
+				'<div id="navButton">' +
+					'<a href="#navPanel" class="toggle"></a>' +
+				'</div>'
+			)
+				.appendTo($body);
+
+		// Panel.
+			$(
+				'<div id="navPanel">' +
+					'<nav>' +
+						$('#nav').navList() +
+					'</nav>' +
+				'</div>'
+			)
+				.appendTo($body)
+				.panel({
+					delay: 500,
+					hideOnClick: true,
+					hideOnSwipe: true,
+					resetScroll: true,
+					resetForms: true,
+					side: 'left',
+					target: $body,
+					visibleClass: 'navPanel-visible'
+				});
+
+		// Fix: Remove navPanel transitions on WP<10 (poor/buggy performance).
+			if (browser.os == 'wp' && browser.osVersion < 10)
+				$('#navButton, #navPanel, #page-wrapper')
+					.css('transition', 'none');
+
+	// Header.
+		if (!browser.mobile
+		&&	$header.hasClass('alt')
+		&&	$banner.length > 0) {
+
+			$window.on('load', function() {
+
+				$banner.scrollex({
+					bottom:		$header.outerHeight(),
+					terminate:	function() { $header.removeClass('alt'); },
+					enter:		function() { $header.addClass('alt reveal'); },
+					leave:		function() { $header.removeClass('alt'); }
+				});
+
+			});
+
+		}
+
+})(jQuery);
